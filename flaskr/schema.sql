@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS message;
-DROP TABLE IF EXISTS conversation;
+DROP TABLE IF EXISTS user_message;
+DROP TABLE IF EXISTS app_conversation;
 DROP TABLE IF EXISTS user_conversation_membership;
 
 CREATE TABLE user (
@@ -9,19 +9,19 @@ CREATE TABLE user (
   password TEXT NOT NULL
 );
 
-CREATE TABLE conversation (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE app_conversation (
+  id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
 CREATE TABLE user_conversation_membership (
   conversation_id INTEGER,
   user_id INTEGER,
   PRIMARY KEY (conversation_id, user_id),
-  FOREIGN KEY (conversation_id) REFERENCES conversation (id),
+  FOREIGN KEY (conversation_id) REFERENCES app_conversation (id),
   FOREIGN KEY (user_id) REFERENCES user (id)
 );
 
-CREATE TABLE message (
+CREATE TABLE user_message (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   sender_id INTEGER NOT NULL,
   conversation_id INTEGER NOT NULL,
@@ -31,5 +31,5 @@ CREATE TABLE message (
   message_read_bool BOOLEAN DEFAULT FALSE,
   body TEXT NOT NULL,
   FOREIGN KEY (sender_id) REFERENCES user (id),
-  FOREIGN KEY (conversation_id) REFERENCES conversation (id)
+  FOREIGN KEY (conversation_id) REFERENCES app_conversation (id)
 );
