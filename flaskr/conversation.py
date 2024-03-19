@@ -34,16 +34,24 @@ def create():
             flash(error)
         else:
             db = get_db()
+
+            if len(usernames) == 1:
+                db.execute(
+
+                )
+
             # Group chats are always created (barring future limitations)
             if len(usernames) > 1:
                 db.execute(
-                    'INSERT INTO app_conversation (is_group)'
+                    'INSERT INTO group_conversation (admin_id)'
                     ' VALUES (?)',
-                    (True,)
+                    (g.user['id'],)
                 )
+
                 conv_id = db.execute(
                     'SELECT id FROM app_conversation ORDER BY id DESC LIMIT 1;'
                 ).fetchone()[0]
+                
                 usernames.append(g.user['username'])
                 for user in usernames:
                     user_id = db.execute(
@@ -57,9 +65,8 @@ def create():
                     )
                 
                 db.execute(
-                    'INSERT INTO user_message (sender_id, conversation_id, body)'
-                    ' VALUES (?, ?, ?)'
-                    ,
+                    'INSERT INTO group_message (sender_id, conversation_id, body)'
+                    ' VALUES (?, ?, ?)',
                     (g.user['id'], conv_id, body)
                 )
             # else:
