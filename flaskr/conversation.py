@@ -28,17 +28,31 @@ def index():
 @login_required
 def chat(id):
     db = get_db()
+
+    if request.method == 'POST':
+        body = request.form['body']
+        error = None
+
+        if not body:
+            error = 'Message can not be empty.'
+
+        if error is not None:
+            flash(error)
+
+
+        db.execute(
+            'INSERT INTO direct_message (sender_id, conversation_id, body)'
+            ' VALUES (?, ?, ?)',
+            (g.user['id'], id, body)
+        )
+    
     messages = db.execute(
         'SELECT * FROM direct_message'
         ' WHERE (conversation_id) = (?)',
         (id,)
     ).fetchall()
 
-    if request.method == 'POST':
-        username = request.form['username'].split(" ")
-        body = request.form['body']
-        error = None
-
+    db.commit()
     
     return render_template('conversation/chat.html',  messages=messages)
 
@@ -53,6 +67,9 @@ def create():
 
         if not usernames:
             error = 'username is required.'
+
+        if not body:
+            error = 'Message can not be empty.'
 
         if error is not None:
             flash(error)
