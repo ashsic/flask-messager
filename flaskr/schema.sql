@@ -10,7 +10,8 @@ CREATE TABLE user (
 );
 
 CREATE TABLE app_conversation (
-  id INTEGER PRIMARY KEY AUTOINCREMENT
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  is_group BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE user_conversation_membership (
