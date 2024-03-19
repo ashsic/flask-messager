@@ -10,7 +10,11 @@
 
 {% block content %}
   {% for conversation in conversations %}
-  <p>{{conversation['id']}}</p>
+  <p>{{conversation['id'], conversation['username']}}</p>
+
+  {% endfor %}
+  {% for message in messages %}
+  <p>{{message['id'], message['body']}}</p>
 
   {% endfor %}
 {% endblock %}
