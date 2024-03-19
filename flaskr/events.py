@@ -1,6 +1,6 @@
 from .websocket import socketio
 
-from flask_socketio import emit
+from flask_socketio import emit, join_room, leave_room
 
 @socketio.on("connect")
 def handle_connect():

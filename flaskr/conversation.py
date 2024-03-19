@@ -21,8 +21,12 @@ def index():
         ,
         (g.user['id'], g.user['id'])
     ).fetchall()
+
+    group_conversations = db.execute(
+        'SELECT * FROM group_message'
+    ).fetchall()
     
-    return render_template('conversation/index.html', conversations=conversations)
+    return render_template('conversation/index.html', conversations=conversations+group_conversations)
 
 @bp.route('/chat/<id>', methods=('GET', 'POST'))
 @login_required
@@ -50,6 +54,8 @@ def chat(id):
         ' WHERE (conversation_id) = (?)',
         (id,)
     ).fetchall()
+
+
 
     db.commit()
     

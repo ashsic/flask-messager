@@ -9,7 +9,7 @@
 
     <div id="message-area">
         {% for message in messages %}
-        <p>{{ message['id'], message['sender_id'], message['body'], message['sent_time'] }}</p>
+        <p>{{ message['id'], message['sender_id'], message['body'], message['message_sent_time'] }}</p>
         {% endfor %}
     </div>
 
