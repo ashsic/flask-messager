@@ -9,15 +9,30 @@ from flaskr.db import get_db
 bp = Blueprint('conversation', __name__)
 
 @bp.route('/')
+@login_required
 def index():
     db = get_db()
     conversations = db.execute(
-        'SELECT * FROM user'
+        'SELECT * FROM direct_conversation'
     ).fetchall()
     messages = db.execute(
-        'SELECT * FROM user_message'
+        'SELECT * FROM direct_message'
     ).fetchall()
-    return render_template('conversation/index.html', conversations=conversations, messages=messages)
+    
+    return render_template('conversation/index.html', conversations=conversations)
+
+@bp.route('/chat/<id>')
+@login_required
+def chat(id):
+    db = get_db()
+    messages = db.execute(
+        'SELECT * FROM direct_message'
+        ' WHERE (conversation_id) = (?)',
+        (id,)
+    ).fetchall()
+    
+    return render_template('conversation/chat.html',  messages=messages)
+
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
@@ -35,13 +50,41 @@ def create():
         else:
             db = get_db()
 
+            # if direct message:
             if len(usernames) == 1:
-                db.execute(
+                user_id = db.execute(
+                    'SELECT id FROM user WHERE username = ?',
+                    (usernames[0],)
+                ).fetchone()[0]
 
+                conv_id = db.execute(
+                    'SELECT id FROM direct_conversation'
+                    ' WHERE (member_1 = ? AND member_2 = ?) OR (member_1 = ? AND member_2 = ?)',
+                    (g.user['id'], user_id, user_id, g.user['id'])
+                ).fetchone()
+
+                # If no existing dm, create one
+                if not conv_id:
+                    db.execute(
+                        'INSERT INTO direct_conversation (member_1, member_2)'
+                        ' VALUES (?, ?)',
+                        (g.user['id'], user_id)
+                    )
+
+                    conv_id = db.execute(
+                        'SELECT id FROM direct_conversation'
+                        ' WHERE (member_1 = ? AND member_2 = ?)',
+                        (g.user['id'], user_id)
+                    ).fetchone()
+                
+                db.execute(
+                    'INSERT INTO direct_message (sender_id, conversation_id, body)'
+                    ' VALUES (?, ?, ?)',
+                    (g.user['id'], conv_id[0], body)
                 )
 
             # Group chats are always created (barring future limitations)
-            if len(usernames) > 1:
+            elif len(usernames) > 1:
                 db.execute(
                     'INSERT INTO group_conversation (admin_id)'
                     ' VALUES (?)',
@@ -49,9 +92,9 @@ def create():
                 )
 
                 conv_id = db.execute(
-                    'SELECT id FROM app_conversation ORDER BY id DESC LIMIT 1;'
+                    'SELECT id FROM group_conversation ORDER BY id DESC LIMIT 1;'
                 ).fetchone()[0]
-                
+
                 usernames.append(g.user['username'])
                 for user in usernames:
                     user_id = db.execute(
@@ -59,7 +102,7 @@ def create():
                         (user,)
                     ).fetchone()[0]
                     db.execute(
-                        'INSERT INTO user_conversation_membership'
+                        'INSERT INTO group_conversation_membership'
                         ' VALUES (?, ?)',
                         (conv_id, user_id)   
                     )
@@ -69,26 +112,6 @@ def create():
                     ' VALUES (?, ?, ?)',
                     (g.user['id'], conv_id, body)
                 )
-            # else:
-            #     # check for existing conversation between 2 users
-            #     conv_id = db.execute(
-            #         'SELECT id FROM app_conversation ac'
-            #         ' INNER JOIN (SELECT * FROM user_conversation_membership WHERE )'
-            #         ' WHERE is_group = FALSE'
-            #     )
-            
-            # Happens if group chat, or no existing dm:
-            # usernames.append(g.user['username'])
-            # for user in usernames:
-            #     user_id = db.execute(
-            #         'SELECT id FROM user WHERE username = ?',
-            #         (user)
-            #     )
-            #     db.execute(
-            #         'INSERT INTO user_conversation_membership'
-            #         ' VALUES (?, ?)',
-            #         (conv_id, user_id)   
-            #     )
 
             db.commit()
             return redirect(url_for('conversation.index'))

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Chat with user{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <div>
+
+    <div>
+        {% for message in messages %}
+        <p>{{message['id'], message['sender_id'], message['body']}}</p>
+        {% endfor %}
+    </div>
+
+      <form method="post">
+        <label for="body">Message:</label>
+        <textarea name="body" id="body">{{ request.form['body'] }}</textarea>
+        <input type="submit" value="Save">
+      </form>
+  </div>
+{% endblock %}

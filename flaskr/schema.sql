@@ -1,8 +1,9 @@
 DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS user_message;
+DROP TABLE IF EXISTS group_message;
 DROP TABLE IF EXISTS group_conversation;
-DROP TABLE IF EXISTS user_conversation_membership;
+DROP TABLE IF EXISTS group_conversation_membership;
 DROP TABLE IF EXISTS direct_message;
+DROP TABLE IF EXISTS direct_conversation;
 
 CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
