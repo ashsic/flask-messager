@@ -39,7 +39,6 @@ def chat(id):
         if error is not None:
             flash(error)
 
-
         db.execute(
             'INSERT INTO direct_message (sender_id, conversation_id, body)'
             ' VALUES (?, ?, ?)',
