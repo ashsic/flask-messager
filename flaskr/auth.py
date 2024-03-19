@@ -1,5 +1,8 @@
 import functools
 
+from .events import socketio
+from flask_socketio import emit
+
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
@@ -57,6 +60,7 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
+            socketio.emit('login')
             return redirect(url_for('index'))
 
         flash(error)

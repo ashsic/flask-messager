@@ -5,6 +5,10 @@ from flask_socketio import emit
 @socketio.on("connect")
 def handle_connect():
     print("Client connected.")
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    print("Client disconnected.")
     
 @socketio.on("new_message")
 def handle_new_message(message):

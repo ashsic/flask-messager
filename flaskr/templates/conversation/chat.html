@@ -7,16 +7,36 @@
 {% block content %}
   <div>
 
-    <div>
+    <div id="message-area">
         {% for message in messages %}
         <p>{{ message['id'], message['sender_id'], message['body'], message['sent_time'] }}</p>
         {% endfor %}
     </div>
 
-      <form method="post">
+      <form method="post" id="send" >
         <label for="body">Message:</label>
         <textarea name="body" id="body">{{ request.form['body'] }}</textarea>
-        <input type="submit" value="Save">
+        <input type="submit" value="Send">
       </form>
+      <script>
+        const socket = io();
+        
+        const send = document.querySelector('#send');
+        send.addEventListener('submit', function (e) {
+          e.preventDefault();
+          let textArea = document.querySelector('#body');
+          socket.emit('new_message', textArea.value);
+          send.submit();
+          textArea.value = "";
+        });
+
+        socket.on('chat', function (data) {
+          const messageArea = document.querySelector("#message-area");
+          const newMessage = document.createElement('p');
+          newMessage.textContent = data["message"];
+          messageArea.appendChild(newMessage);
+        });
+
+      </script>
   </div>
 {% endblock %}
