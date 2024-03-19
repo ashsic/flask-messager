@@ -11,8 +11,11 @@
 {% block content %}
   <div>
     {% for conversation in conversations %}
-    <p>{{conversation['id'], conversation['member_1'], conversation['member_2']}}</p>
-    <a class="action" href="/chat/{{ conversation['id'] }}">{{ conversation['id'] }}</a>
+    
+    {% set conv_user = conversation['username'] if conversation['username'] != g.user['username'] else conversation['username2'] %}
+
+    <p>{{conversation['id'], conv_user}}</p>
+    <a class="action" href="/chat/{{ conversation['id'] }}">{{ conv_user }}</a>
     {% endfor %}
   </div>
 

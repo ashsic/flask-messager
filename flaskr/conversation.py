@@ -13,15 +13,18 @@ bp = Blueprint('conversation', __name__)
 def index():
     db = get_db()
     conversations = db.execute(
-        'SELECT * FROM direct_conversation'
-    ).fetchall()
-    messages = db.execute(
-        'SELECT * FROM direct_message'
+        'SELECT dc.id, u.username, u2.username AS username2'
+        ' FROM direct_conversation dc'
+        ' INNER JOIN user u ON u.id = dc.member_1'
+        ' INNER JOIN user u2 ON u2.id = dc.member_2'
+        ' WHERE u2.id = ? OR u.id = ?'
+        ,
+        (g.user['id'], g.user['id'])
     ).fetchall()
     
     return render_template('conversation/index.html', conversations=conversations)
 
-@bp.route('/chat/<id>')
+@bp.route('/chat/<id>', methods=('GET', 'POST'))
 @login_required
 def chat(id):
     db = get_db()
@@ -30,6 +33,12 @@ def chat(id):
         ' WHERE (conversation_id) = (?)',
         (id,)
     ).fetchall()
+
+    if request.method == 'POST':
+        username = request.form['username'].split(" ")
+        body = request.form['body']
+        error = None
+
     
     return render_template('conversation/chat.html',  messages=messages)
 
